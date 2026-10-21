@@ -1,6 +1,6 @@
 import { app, ipcMain, type IpcMainInvokeEvent } from 'electron'
 import type { Store } from '../persistence'
-import { resolveDesktopAuthorizedPath } from '../ipc/local-file-access-resolution'
+import { resolveLocalRequestPath } from '../ipc/local-file-access-resolution'
 import { saveDroppedImageFileInRuntime } from './dropped-image-runtime-upload'
 import { isTrustedClipboardRenderer } from './clipboard-trust'
 
@@ -46,7 +46,15 @@ export function registerDroppedImageFileHandlers(store: Store): void {
       if (!request) {
         throw new Error('Invalid image file upload request')
       }
-      const authorizedPath = await resolveDesktopAuthorizedPath(request.filePath, store)
+      // Why chat-image, not the desktop roots check: a dropped photo is named by
+      // an explicit user gesture, like a transcript image, so it reads where it
+      // is — the roots check refused legitimate photos outside the project.
+      const authorizedPath = await resolveLocalRequestPath(
+        request.filePath,
+        { kind: 'chat-image' },
+        store,
+        'read'
+      )
       return saveDroppedImageFileInRuntime(
         app.getPath('userData'),
         request.runtimeEnvironmentId,
