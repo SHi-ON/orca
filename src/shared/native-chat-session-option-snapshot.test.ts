@@ -205,8 +205,8 @@ describe('buildNativeChatSessionOptionSnapshot', () => {
         MUSE_SESSION_OPTION_CATALOG.models,
         record
       )
-      expect(reconciled).toHaveLength(1)
-      expect(reconciled[0].options.map((option) => option.id)).toEqual(['effort'])
+      const tracked = reconciled.find((model) => model.id === 'muse-spark-1.3-contributor')
+      expect(tracked?.options.map((option) => option.id)).toEqual(['effort', 'permissionProfile'])
     })
 
     it('leaves the list alone when the tracked model is already listed', () => {

@@ -342,8 +342,8 @@ describe('useNativeChatSessionOptions model reporting', () => {
   })
 
   it('reports a Muse model and effort from its terminal status line', async () => {
-    // Why: Muse seeds no models and its hook stamps none, so the TUI status
-    // line is the only source naming what the live session runs.
+    // Why: the Muse hook stamps no model, so the TUI status line is the source
+    // naming what the live session runs; the report reconciles into the seeded catalog.
     discoverModels.mockResolvedValue([])
     const dispatchCommand = vi.fn()
     const { result } = renderHook(() =>
@@ -359,11 +359,18 @@ describe('useNativeChatSessionOptions model reporting', () => {
     await waitFor(() =>
       expect(modelDescriptor(result.current.snapshot).currentValue).toBe('muse-spark-1.3')
     )
-    // The reported id is the only model row: no catalog, no picker.
     expect(modelDescriptor(result.current.snapshot).choices.map((choice) => choice.value)).toEqual([
-      'muse-spark-1.3'
+      'muse-wonder-1.0',
+      'muse-wonder-full-1.0',
+      'muse-spark-1.3',
+      'muse-spark-1.2'
     ])
     const effort = result.current.snapshot.find((descriptor) => descriptor.id === 'effort')
     expect((effort?.kind as { currentValue?: string } | undefined)?.currentValue).toBe('max')
+    // Permissions opens the TUI's own /permissions picker mid-session.
+    const permissions = result.current.snapshot.find(
+      (descriptor) => descriptor.id === 'permissionProfile'
+    )
+    expect(permissions?.action).toEqual({ type: 'agent-picker' })
   })
 })

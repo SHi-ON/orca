@@ -11,8 +11,8 @@ const MUSE_STATUS_LINE =
 
 /**
  * Current Muse model/effort scraped from the TUI status line. The model id is
- * reported raw: account-scoped ids have no catalog listing, so there is no
- * picker, but the pill still names what the session runs.
+ * reported raw and reconciled against the catalog's four meta-provider models,
+ * so the pill and the picker name what the session runs.
  */
 export function readMuseSessionOptionsFromTerminalScreen(
   screen: string | null | undefined
