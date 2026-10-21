@@ -340,4 +340,30 @@ describe('useNativeChatSessionOptions model reporting', () => {
     )
     expect(modelDescriptor(result.current.snapshot).currentValue).toBeUndefined()
   })
+
+  it('reports a Muse model and effort from its terminal status line', async () => {
+    // Why: Muse seeds no models and its hook stamps none, so the TUI status
+    // line is the only source naming what the live session runs.
+    discoverModels.mockResolvedValue([])
+    const dispatchCommand = vi.fn()
+    const { result } = renderHook(() =>
+      useNativeChatSessionOptions({
+        agent: 'muse',
+        terminalTabId: 'tab-muse',
+        targetPtyId: 'pty-muse',
+        dispatchCommand,
+        readTerminalScreen: () => 'Muse Code 1.4.10\n❯\n  muse-spark-1.3 · max · ~/repo · YOLO'
+      })
+    )
+
+    await waitFor(() =>
+      expect(modelDescriptor(result.current.snapshot).currentValue).toBe('muse-spark-1.3')
+    )
+    // The reported id is the only model row: no catalog, no picker.
+    expect(modelDescriptor(result.current.snapshot).choices.map((choice) => choice.value)).toEqual([
+      'muse-spark-1.3'
+    ])
+    const effort = result.current.snapshot.find((descriptor) => descriptor.id === 'effort')
+    expect((effort?.kind as { currentValue?: string } | undefined)?.currentValue).toBe('max')
+  })
 })

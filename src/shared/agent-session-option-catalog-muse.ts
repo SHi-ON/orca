@@ -21,7 +21,10 @@ const MUSE_EFFORT: CatalogOption = {
   },
   apply: {
     launchArgs: (value) => ['--reasoning-effort', String(value)],
-    removeAgentArgs: (tokens) => removeAgentArgOption('muse', tokens, ['--reasoning-effort'])
+    removeAgentArgs: (tokens) => removeAgentArgOption('muse', tokens, ['--reasoning-effort']),
+    // Why: same shape as the claude-codex effort option — the pill dispatches
+    // the slash command into the live PTY.
+    midSession: { kind: 'command', build: (value) => `/effort ${String(value)}` }
   }
 }
 
