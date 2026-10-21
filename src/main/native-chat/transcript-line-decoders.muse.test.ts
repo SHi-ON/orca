@@ -115,7 +115,7 @@ describe('decodeMuseTranscriptLine', () => {
       'f'
     )
     expect(decoded?.role).toBe('tool')
-    expect(decoded?.blocks).toEqual([{ type: 'tool-result', output: '  ok\n' }])
+    expect(decoded?.blocks).toEqual([{ type: 'tool-result', output: '  ok\n', callId: 'call-1' }])
   })
 
   it('renders a question prompt as an assistant card', () => {

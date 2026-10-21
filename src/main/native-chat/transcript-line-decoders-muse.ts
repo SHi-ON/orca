@@ -184,9 +184,15 @@ function museToolResultBlocks(value: unknown): NativeChatBlock[] {
     }
     // Why: read the output through the shared coercion rather than via
     // `extractString` — it trims, and leading/trailing whitespace is meaningful
-    // in captured command output. Muse results carry no error flag; the
-    // detached task `failed` row is skipped.
-    blocks.push({ type: 'tool-result', output: toolResultOutput(result.text) })
+    // in captured command output. The call id pairs the output with its call;
+    // without it the chat treats the output as unattributed and hides it.
+    // Muse results carry no error flag; the detached task `failed` row is skipped.
+    const toolCallId = extractString(result.tool_call_id)
+    blocks.push({
+      type: 'tool-result',
+      output: toolResultOutput(result.text),
+      ...(toolCallId ? { callId: toolCallId } : {})
+    })
   }
   return blocks
 }
