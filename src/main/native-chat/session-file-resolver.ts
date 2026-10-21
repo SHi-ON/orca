@@ -221,7 +221,8 @@ async function resolveSessionFileById(
     return resolveMuseSessionFile(
       trimmedId,
       resolveMuseSessionsDir(options.museSessionsDir),
-      signal
+      signal,
+      options.strictErrors
     )
   }
   // Why: a new transcript agent must pick its own resolver. Falling through to
@@ -337,7 +338,8 @@ async function findHostSessionFile(
 async function resolveMuseSessionFile(
   sessionId: string,
   sessionsDir: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  strictErrors?: boolean
 ): Promise<string | null> {
   if (!sessionsDir) {
     return null
@@ -350,7 +352,8 @@ async function resolveMuseSessionFile(
     // the parent file for a parent id and the child file for a child id, never
     // crossing between them.
     filePredicate: (path) => museSessionIdFromFilePath(path) === sessionId,
-    signal
+    signal,
+    strictErrors
   })
   return files[0] ?? null
 }

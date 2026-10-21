@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { chmod, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -219,6 +219,33 @@ describe('resolveSessionFilePath', () => {
       resolveSessionFilePath('muse', 'sess-muse-child', { museSessionsDir })
     ).resolves.toBe(childLog)
   })
+
+  it.skipIf(process.platform === 'win32' || process.getuid?.() === 0)(
+    'forwards strictErrors through Muse resolution',
+    async () => {
+      const root = await makeRoot('orca-native-chat-resolve-muse-strict-')
+      const museSessionsDir = join(root, 'muse-sessions')
+      const sessionDir = join(museSessionsDir, '2026', '09', '26', 'sess-muse-blocked')
+      await mkdir(sessionDir, { recursive: true })
+      await writeFile(join(sessionDir, 'session.jsonl'), '{}\n')
+      await chmod(sessionDir, 0o000)
+      try {
+        // Why: strict callers (session adoption) must distinguish an unreadable
+        // tree from a missing session; lenient callers keep the null.
+        await expect(
+          resolveSessionFilePath('muse', 'sess-muse-blocked', {
+            museSessionsDir,
+            strictErrors: true
+          })
+        ).rejects.toThrow()
+        await expect(
+          resolveSessionFilePath('muse', 'sess-muse-blocked', { museSessionsDir })
+        ).resolves.toBeNull()
+      } finally {
+        await chmod(sessionDir, 0o755)
+      }
+    }
+  )
 
   it('honors XDG_DATA_HOME when resolving Muse transcripts', async () => {
     const root = await makeRoot('orca-native-chat-resolve-muse-xdg-')
