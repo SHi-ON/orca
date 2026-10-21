@@ -131,8 +131,7 @@ export abstract class OrcaRuntimeWithReclaimTerminalForDesktop extends OrcaRunti
   // Why: read-side clamp for mobileAutoRestoreFitMs. `null` means
   // indefinite hold (no auto-restore timer). A finite value is clamped
   // to [MIN, MAX] to defend against bad config — the smallest useful
-  // value is a few seconds, the largest is one hour. See
-  // docs/mobile-fit-hold.md.
+  // value is one second, the largest is one hour.
   protected getAutoRestoreFitMs(): number | null {
     const raw = this.store?.getSettings().mobileAutoRestoreFitMs ?? null
     if (raw == null) {

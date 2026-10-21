@@ -903,10 +903,20 @@ describe('mobile subscribe integration', () => {
       expect(ptySizes.get('pty-1')).toEqual({ cols: 45, rows: 20 })
     })
 
+    it('the 1s floor restores one second after the phone leaves the terminal', async () => {
+      const { runtime, ptySizes } = createRuntime()
+      expect(runtime.setMobileAutoRestoreFitMs(1_000)).toBe(1_000)
+      await runtime.handleMobileSubscribe('pty-1', 'client-a', { cols: 45, rows: 20 })
+      runtime.handleMobileUnsubscribe('pty-1', 'client-a')
+
+      await vi.advanceTimersByTimeAsync(1_000)
+      expect(ptySizes.get('pty-1')).toEqual({ cols: 150, rows: 40 })
+    })
+
     it('setMobileAutoRestoreFitMs clamps below MIN to MIN', () => {
       const { runtime } = createRuntime()
       const result = runtime.setMobileAutoRestoreFitMs(100)
-      expect(result).toBe(5_000)
+      expect(result).toBe(1_000)
     })
 
     it('setMobileAutoRestoreFitMs clamps above MAX to MAX', () => {

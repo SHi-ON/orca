@@ -12,6 +12,17 @@ export const AUTO_RESTORE_FIT_OPTIONS: { value: string; label: string; ms: numbe
     ms: null
   },
   {
+    value: 'on-leave',
+    get label() {
+      return translate(
+        'auto.components.settings.MobilePane.3b9e1d7c52',
+        'As soon as you leave the terminal'
+      )
+    },
+    // Why: matches the host's 1s floor, which absorbs the phone's own quick resubscribes.
+    ms: 1_000
+  },
+  {
     value: '60s',
     get label() {
       return translate('auto.components.settings.MobilePane.c474aa09d8', 'After 1 minute')

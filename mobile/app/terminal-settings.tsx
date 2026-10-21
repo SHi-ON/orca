@@ -26,7 +26,7 @@ import {
   saveTerminalTextScale
 } from '../src/storage/preferences'
 
-type RestoreValue = 'indefinite' | '60s' | '5m' | '30m'
+type RestoreValue = 'indefinite' | 'on-leave' | '60s' | '5m' | '30m'
 
 type TextSizeValue = 'smallest' | 'smaller' | 'default' | 'large' | 'larger' | 'largest'
 
@@ -51,6 +51,7 @@ function textSizeSummary(scale: number): string {
 
 const AUTO_RESTORE_FIT_OPTIONS: (PickerOption<RestoreValue> & { ms: number | null })[] = [
   { value: 'indefinite', label: 'Keep at phone size (default)', ms: null },
+  { value: 'on-leave', label: 'As soon as you leave the terminal', ms: 1_000 },
   { value: '60s', label: 'After 1 minute', ms: 60_000 },
   { value: '5m', label: 'After 5 minutes', ms: 5 * 60_000 },
   { value: '30m', label: 'After 30 minutes', ms: 30 * 60_000 }

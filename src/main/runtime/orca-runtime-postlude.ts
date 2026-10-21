@@ -63,7 +63,7 @@ export const TUI_IDLE_POLL_INTERVAL_MS = 2000
 
 export const TUI_IDLE_QUIESCENCE_MS = 3000
 
-// Clamp for mobileAutoRestoreFitMs: floor above the legacy 300ms debounce, 1h ceiling (a held PTY beyond that is "I forgot", not intentional).
-export const MOBILE_AUTO_RESTORE_FIT_MIN_MS = 5_000
+// Clamp for mobileAutoRestoreFitMs: the 1s floor rides out a phone's own unsubscribe/resubscribe (iOS resume, refit) without a reflow; 1h ceiling (a held PTY beyond that is "I forgot", not intentional).
+export const MOBILE_AUTO_RESTORE_FIT_MIN_MS = 1_000
 
 export const MOBILE_AUTO_RESTORE_FIT_MAX_MS = 60 * 60 * 1000
