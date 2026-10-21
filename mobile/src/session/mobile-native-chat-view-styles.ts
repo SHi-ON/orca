@@ -3,6 +3,8 @@ import { colors, spacing, typography } from '../theme/mobile-theme'
 
 const FLOATING_CONTROLS_BOTTOM = spacing.md
 const TOOLS_PILL_HEIGHT = 32
+const LOAD_EARLIER_HEIGHT = 44
+const LOAD_EARLIER_RETRY_HEIGHT = 28
 
 export const styles = StyleSheet.create({
   root: {
@@ -91,18 +93,28 @@ export const styles = StyleSheet.create({
   loadEarlier: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: spacing.md,
-    minHeight: 36
+    height: LOAD_EARLIER_HEIGHT
   },
-  loadEarlierText: {
-    color: colors.textMuted,
-    fontSize: typography.metaSize,
-    fontWeight: '600'
+  loadEarlierFailed: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md
+  },
+  // The Tools pill's shape, one size down.
+  loadEarlierRetry: {
+    justifyContent: 'center',
+    height: LOAD_EARLIER_RETRY_HEIGHT,
+    paddingHorizontal: spacing.md,
+    borderRadius: LOAD_EARLIER_RETRY_HEIGHT / 2,
+    backgroundColor: colors.bgRaised,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.borderSubtle
   },
   loadEarlierFailedText: {
+    flexShrink: 1,
     color: colors.textMuted,
     fontSize: typography.metaSize,
-    textAlign: 'center',
-    marginTop: spacing.xs
+    textAlign: 'center'
   }
 })
