@@ -4,6 +4,7 @@ import { FLOATING_WORKSPACE_WORKTREE_ID } from './floating-workspace'
 import { WORKSPACE_ON_OTHER_RUNTIME } from '../../../src/shared/protocol-version'
 import {
   loadMobileNewTabAgentOptions,
+  MobileAgentDetectionNeedsHostUpdateError,
   MobileWorkspaceOnOtherRuntimeError
 } from './mobile-new-tab-agent-loader'
 
@@ -36,10 +37,12 @@ describe('mobile new-tab agent loading', () => {
         client,
         worktreeId: FLOATING_WORKSPACE_WORKTREE_ID
       })
-    ).resolves.toEqual([
-      { agent: 'codex', label: 'Codex' },
-      { agent: 'claude', label: 'Claude' }
-    ])
+    ).resolves.toMatchObject({
+      options: [
+        { agent: 'codex', label: 'Codex' },
+        { agent: 'claude', label: 'Claude' }
+      ]
+    })
     expect(client.sendRequest.mock.calls.map(([method]) => method)).toEqual([
       'preflight.detectAgents',
       'settings.get'
@@ -66,7 +69,7 @@ describe('mobile new-tab agent loading', () => {
         client,
         worktreeId: 'repo-1::/remote/worktree'
       })
-    ).resolves.toEqual([{ agent: 'claude', label: 'Claude' }])
+    ).resolves.toMatchObject({ options: [{ agent: 'claude', label: 'Claude' }] })
     expect(client.sendRequest.mock.calls.map(([method]) => method)).toEqual([
       'repo.list',
       'settings.get',
@@ -145,7 +148,7 @@ describe('mobile new-tab agent loading', () => {
         worktreeId: 'repo-1::/srv/worktree',
         hostRefusesOtherRuntime: true
       })
-    ).resolves.toEqual([{ agent: 'claude', label: 'Claude' }])
+    ).resolves.toMatchObject({ options: [{ agent: 'claude', label: 'Claude' }] })
     expect(answered.sendRequest.mock.calls.map(([method]) => method)).toEqual([
       'repo.list',
       'settings.get',
@@ -162,5 +165,71 @@ describe('mobile new-tab agent loading', () => {
       'repo.list',
       'settings.get'
     ])
+  })
+
+  it('#16215: lets the host place a folder workspace, which has no repo to look up', async () => {
+    const client = createClient(async (method, params) => {
+      if (method === 'settings.get') {
+        return { ok: true, result: { settings: {} } }
+      }
+      if (method === 'preflight.detectAgents') {
+        expect(params).toEqual({ worktreeId: 'folder:fw-1' })
+        return { ok: true, result: ['claude'] }
+      }
+      throw new Error(`unexpected request: ${method}`)
+    })
+    await expect(
+      loadMobileNewTabAgentOptions({
+        client,
+        worktreeId: 'folder:fw-1',
+        hostScopesDetection: true
+      })
+    ).resolves.toMatchObject({ options: [{ agent: 'claude', label: 'Claude' }] })
+  })
+
+  it('refreshes like desktop, and detects only where the host predates refresh for phones', async () => {
+    const client = createClient(async (method) => {
+      if (method === 'settings.get') {
+        return { ok: true, result: { settings: {} } }
+      }
+      if (method === 'preflight.refreshAgents') {
+        return {
+          ok: false,
+          error: {
+            code: 'forbidden',
+            message: "Method 'preflight.refreshAgents' is not available to mobile clients"
+          }
+        }
+      }
+      if (method === 'preflight.detectAgents') {
+        return { ok: true, result: ['claude'] }
+      }
+      throw new Error(`unexpected request: ${method}`)
+    })
+    await expect(
+      loadMobileNewTabAgentOptions({
+        client,
+        worktreeId: FLOATING_WORKSPACE_WORKTREE_ID,
+        refresh: true
+      })
+    ).resolves.toMatchObject({ options: [{ agent: 'claude', label: 'Claude' }] })
+    expect(client.sendRequest.mock.calls.map(([method]) => method)).toEqual([
+      'preflight.refreshAgents',
+      'settings.get',
+      'preflight.detectAgents'
+    ])
+  })
+
+  it('#16215: an older host would answer its own agents for a folder, so nothing is probed', async () => {
+    const client = createClient(async (method) => {
+      if (method === 'settings.get') {
+        return { ok: true, result: { settings: {} } }
+      }
+      throw new Error(`unexpected request: ${method}`)
+    })
+    await expect(
+      loadMobileNewTabAgentOptions({ client, worktreeId: 'folder:fw-1' })
+    ).rejects.toBeInstanceOf(MobileAgentDetectionNeedsHostUpdateError)
+    expect(client.sendRequest.mock.calls.map(([method]) => method)).toEqual(['settings.get'])
   })
 })

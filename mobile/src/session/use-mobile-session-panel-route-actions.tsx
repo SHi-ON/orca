@@ -50,6 +50,13 @@ export function useMobileSessionPanelRouteActions(scope: MobileSessionPresentati
     disabled: true,
     onPress: () => {}
   }
+  const hostUpdateAgentRow = {
+    label: 'Agents Need a Newer Orca',
+    hint: 'Update Orca on your computer',
+    icon: Bot,
+    disabled: true,
+    onPress: () => {}
+  }
   const createTabAgentActions =
     createTabAgentLoadState === 'loading'
       ? [
@@ -81,17 +88,19 @@ export function useMobileSessionPanelRouteActions(scope: MobileSessionPresentati
             ]
           : createTabAgentLoadState === 'other-runtime'
             ? [otherRuntimeAgentRow]
-            : createTabAgentLoadState === 'error'
-              ? [
-                  {
-                    label: 'Agent Presets Unavailable',
-                    hint: 'Check the host connection',
-                    icon: Bot,
-                    disabled: true,
-                    onPress: () => {}
-                  }
-                ]
-              : []
+            : createTabAgentLoadState === 'host-update'
+              ? [hostUpdateAgentRow]
+              : createTabAgentLoadState === 'error'
+                ? [
+                    {
+                      label: 'Agent Presets Unavailable',
+                      hint: 'Check the host connection',
+                      icon: Bot,
+                      disabled: true,
+                      onPress: () => {}
+                    }
+                  ]
+                : []
   const sendDiffNotesAgentActions =
     pendingDiffNotesDelivery === null
       ? []
@@ -135,17 +144,19 @@ export function useMobileSessionPanelRouteActions(scope: MobileSessionPresentati
               ]
             : createTabAgentLoadState === 'other-runtime'
               ? [otherRuntimeAgentRow]
-              : createTabAgentLoadState === 'error'
-                ? [
-                    {
-                      label: 'Agent Presets Unavailable',
-                      hint: 'Copy notes instead',
-                      icon: Bot,
-                      disabled: true,
-                      onPress: () => {}
-                    }
-                  ]
-                : []
+              : createTabAgentLoadState === 'host-update'
+                ? [hostUpdateAgentRow]
+                : createTabAgentLoadState === 'error'
+                  ? [
+                      {
+                        label: 'Agent Presets Unavailable',
+                        hint: 'Copy notes instead',
+                        icon: Bot,
+                        disabled: true,
+                        onPress: () => {}
+                      }
+                    ]
+                  : []
 
   // Panel-icon taps route through the dock-vs-push decision (U1): dock-capable rows dock, constrained rows push.
   const handleSessionContentRowLayout = useCallback((event: LayoutChangeEvent) => {
