@@ -8,7 +8,9 @@ export const MUSE_STRUCTURED_AGENT: DirectoryAccountAgentDefinition = {
   accountHomeVariable: 'HOME',
   capabilities: {
     rewind: false,
-    compact: true,
+    // MSP session/compact stays unwired in v1, so the registry must not
+    // demand an adapter compact method it does not have yet.
+    compact: false,
     threadGoal: false,
     contextUsage: false,
     imagePrompts: true,
